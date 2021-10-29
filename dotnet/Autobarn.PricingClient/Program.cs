@@ -21,7 +21,7 @@ namespace Autobarn.PricingClient {
 			bus = RabbitHutch.CreateBus(config.GetConnectionString("AutobarnRabbitMQ"));
 			await bus.PubSub.SubscribeAsync<NewVehicleMessage>(subscriberId, HandleNewVehicleMessage);
 			Console.WriteLine("Connected! Listening for NewVehicleMessage messages.");
-			Console.ReadLine();
+			Console.ReadKey(true);
 		}
 
 		private static async Task HandleNewVehicleMessage(NewVehicleMessage incomingMessage) {

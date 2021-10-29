@@ -16,11 +16,9 @@ namespace Autobarn.Website.Controllers.api {
 	[ApiController]
 	public class VehiclesController : ControllerBase {
 		private readonly IAutobarnDatabase db;
-		private readonly IBus bus;
 
-		public VehiclesController(IAutobarnDatabase db, IBus bus) {
+		public VehiclesController(IAutobarnDatabase db) {
 			this.db = db;
-			this.bus = bus;
 		}
 
 		private dynamic Paginate(string url, int index, int count, int total) {
@@ -79,22 +77,7 @@ namespace Autobarn.Website.Controllers.api {
 				VehicleModel = vehicleModel
 			};
 			db.CreateVehicle(vehicle);
-			//TODO: notify the message bus that there is a new vehicle.
-			PublishNewVehicleMessage(vehicle);
 			return Ok(dto);
-		}
-
-		private void PublishNewVehicleMessage(Vehicle vehicle) {
-			var message = new NewVehicleMessage() {
-				Registration = vehicle.Registration,
-				Manufacturer = vehicle.VehicleModel?.Manufacturer?.Name,
-				ModelName = vehicle.VehicleModel?.Name,
-				ModelCode = vehicle.VehicleModel?.Code,
-				Color = vehicle.Color,
-				Year = vehicle.Year,
-				ListedAtUtc = DateTime.UtcNow
-			};
-			bus.PubSub.Publish(message);
 		}
 
 		// PUT api/vehicles/ABC123

@@ -1,6 +1,5 @@
 using Autobarn.Data;
 using Autobarn.Website.GraphQL.Schemas;
-using Autobarn.Website.Hubs;
 using EasyNetQ;
 using GraphiQl;
 using GraphQL.Server;
@@ -36,14 +35,10 @@ namespace Autobarn.Website {
 					break;
 			}
 
-			services.AddSignalR();
 			services.AddScoped<AutobarnSchema>();
 			services
 				.AddGraphQL(options => options.EnableMetrics = false)
 				.AddNewtonsoftJson();
-
-			var bus = RabbitHutch.CreateBus(Configuration.GetConnectionString("AutobarnRabbitMQ"));
-			services.AddSingleton<IBus>(bus);
 		}
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
@@ -64,7 +59,6 @@ namespace Autobarn.Website {
 			app.UseGraphiQl("/graphiql");
 
 			app.UseEndpoints(endpoints => {
-				endpoints.MapHub<AutobarnHub>("/hub");
 				endpoints.MapControllerRoute(
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
