@@ -38,7 +38,22 @@ namespace Autobarn.Website.Controllers.api {
 			var items = db.ListVehicles().Skip(index).Take(count);
 			var total = db.CountVehicles();
 			var _links = Paginate("/api/vehicles", index, count, total);
-			var result = new { _links, index, count, total, items };
+			var _actions = new {
+				create = new {
+					method = "POST",
+					type = "application/json",
+					name = "Create a new vehicle",
+					href = "/api/vehicles"
+				},
+				delete = new {
+					method = "DELETE",
+					name = "Delete a vehicle",
+					href = "/api/vehicles/{id}"
+				}
+			};
+			var result = new {
+				_links, _actions, index, count, total, items
+			};
 			return Ok(result);
 		}
 

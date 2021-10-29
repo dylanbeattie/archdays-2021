@@ -17,10 +17,21 @@ namespace Autobarn.Website.Tests {
 		}
 
 		[Fact]
-		public async void GET_vehicles_returns_success_status_code() {
-			var response = await client.GetAsync("/api/vehicles");
+		public async void GET_api_returns_api_discovery_endpoint() {
+			var response = await client.GetAsync("/api");
 			Assert.True(response.IsSuccessStatusCode);
 		}
+
+		[Fact]
+		public async void GET_vehicles_returns_success_status_code() {
+			var api = await client.GetAsync("/api");
+			var json = await api.Content.ReadAsStringAsync();
+			var data = JsonConvert.DeserializeObject<dynamic>(json);
+			var vehiclesUri = (string)data["_links"]["vehicles"]["href"];
+			var response = await client.GetAsync(vehiclesUri);
+			Assert.True(response.IsSuccessStatusCode);
+		}
+
 
 		[Fact]
 		public async void GET_vehicles_returns_vehicle_data() {
