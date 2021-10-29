@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Autobarn.PricingServer": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://workshop.ursatile.com:5003"
+    }
+  }
+}
