@@ -19,7 +19,7 @@ class PricingService(pb2_grpc.PricerServicer):
         elif "delorean" in request.modelCode.lower():
             result = {'price': 50000, 'currencyCode': 'USD'}
         else:
-            price = 3000 - request.year
+            price = 1000 + (request.year * 10)
             result = {'price': price, 'currencyCode': 'GBP '}
 
         return pb2.PriceReply(**result)

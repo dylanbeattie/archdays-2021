@@ -12,7 +12,19 @@ namespace Autobarn.AuditLog {
 		private const string SUBSCRIBER_ID = "Autobarn.AuditLog";
 
 		static async Task Main(string[] args) {
-			//TODO: implement message subscriber here
+			var bus = RabbitHutch.CreateBus(config.GetConnectionString("AutobarnRabbitMQ"));
+			await bus.PubSub.SubscribeAsync<NewVehicleMessage>(SUBSCRIBER_ID, HandleNewVehicleMessage);
+			Console.WriteLine("Listening for new vehicle messages (press Enter to quit)");
+			Console.ReadLine();
+		}
+
+		private static void HandleNewVehicleMessage(NewVehicleMessage nvm) {
+			Console.WriteLine("====== NEW VEHICLE MESSAGE! YAY! ======");
+			Console.WriteLine($"Make: {nvm.Manufacturer}");
+			Console.WriteLine($"Mode: {nvm.ModelName}");
+			Console.WriteLine($"Color: {nvm.Color}");
+			Console.WriteLine($"Year: {nvm.Year}");
+			Console.WriteLine($"Reg: {nvm.Registration}");
 		}
 
 		private static IConfigurationRoot ReadConfiguration() {

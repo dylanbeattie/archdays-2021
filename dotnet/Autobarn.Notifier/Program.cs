@@ -12,22 +12,26 @@ namespace Autobarn.Notifier {
 	class Program {
 		private static readonly IConfigurationRoot config = ReadConfiguration();
 		private static IBus bus;
+		private static HubConnection hub;
 		private const string SUBSCRIBER = "Autobarn.Notifier";
 
 		static async Task Main(string[] args) {
 			JsonConvert.DefaultSettings = JsonSettings;
 
+			hub = new HubConnectionBuilder().WithUrl(config["AutobarnSignalRHubUrl"]).Build();
+			await hub.StartAsync();
+
 			Console.WriteLine("Connected to SignalR Hub.");
 			bus = RabbitHutch.CreateBus(config.GetConnectionString("AutobarnRabbitMQ"));
 			await bus.PubSub.SubscribeAsync<NewVehiclePriceMessage>(SUBSCRIBER, HandleNewVehiclePriceMessage);
 			Console.WriteLine("Connected to message bus. Listening for NewVehiclePriceMessages.");
-			Console.ReadKey(false);
+			Console.ReadLine();
 		}
 
 		private static async Task HandleNewVehiclePriceMessage(NewVehiclePriceMessage message) {
 			var json = JsonConvert.SerializeObject(message);
 			Console.WriteLine($"Sending JSON to hub: {json}");
-			//TODO: send JSON to hub!
+			await hub.SendAsync("NotifyWebUsers", "Autobarn.Notifier", json);
 			Console.WriteLine("Sent!");
 		}
 

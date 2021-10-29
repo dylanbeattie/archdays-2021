@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Routing;
 using System;
 using System.Dynamic;
 using System.Linq;
+using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,9 +17,11 @@ namespace Autobarn.Website.Controllers.api {
 	[ApiController]
 	public class VehiclesController : ControllerBase {
 		private readonly IAutobarnDatabase db;
+		private readonly IBus bus;
 
-		public VehiclesController(IAutobarnDatabase db) {
+		public VehiclesController(IAutobarnDatabase db, IBus bus) {
 			this.db = db;
+			this.bus = bus;
 		}
 
 		private dynamic Paginate(string url, int index, int count, int total) {
@@ -83,7 +86,7 @@ namespace Autobarn.Website.Controllers.api {
 
 		// POST api/vehicles
 		[HttpPost]
-		public IActionResult Post([FromBody] VehicleDto dto) {
+		public async Task<IActionResult> Post([FromBody] VehicleDto dto) {
 			var vehicleModel = db.FindModel(dto.ModelCode);
 			var vehicle = new Vehicle {
 				Registration = dto.Registration,
@@ -92,7 +95,22 @@ namespace Autobarn.Website.Controllers.api {
 				VehicleModel = vehicleModel
 			};
 			db.CreateVehicle(vehicle);
+			//TODO: publish a notification about the new vehicle.
+			await PublishNewVehicleMessage(vehicle);
 			return Ok(dto);
+		}
+
+		private async Task PublishNewVehicleMessage(Vehicle vehicle) {
+			var newVehicleMessage = new NewVehicleMessage() {
+				Registration = vehicle.Registration,
+				Manufacturer = vehicle.VehicleModel?.Manufacturer?.Name,
+				ModelName = vehicle.VehicleModel?.Name,
+				ModelCode = vehicle.VehicleModel?.Code,
+				Color = vehicle.Color,
+				Year = vehicle.Year,
+				ListedAtUtc = DateTime.UtcNow
+			};
+			await bus.PubSub.PublishAsync(newVehicleMessage);
 		}
 
 		// PUT api/vehicles/ABC123

@@ -20,12 +20,12 @@ namespace Autobarn.PricingClient {
 			grpcClient = new Pricer.PricerClient(channel);
 			bus = RabbitHutch.CreateBus(config.GetConnectionString("AutobarnRabbitMQ"));
 			await bus.PubSub.SubscribeAsync<NewVehicleMessage>(subscriberId, HandleNewVehicleMessage);
-			Console.WriteLine("Connected! Listening for NewVehicleMessage messages.");
-			Console.ReadKey(true);
+			Console.WriteLine("Connected! Listening for NewVehicleMessage messages. Press Enter to quit.");
+			Console.ReadLine();
 		}
 
 		private static async Task HandleNewVehicleMessage(NewVehicleMessage incomingMessage) {
-			Console.WriteLine($"Received NewVehicleMessage: {incomingMessage.ModelCode} ({incomingMessage.Color}, {incomingMessage.Year}");
+			Console.WriteLine($"Received NewVehicleMessage: {incomingMessage.ModelCode} ({incomingMessage.Color}, {incomingMessage.Year})");
 			var request = new PriceRequest {
 				ModelCode = incomingMessage.ModelCode,
 				Color = incomingMessage.Color,
